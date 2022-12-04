@@ -33,8 +33,10 @@ class BotPlayer:
             move = str(minimaxResult[0])
             minimax_board = minimaxResult[1]
             print(f'Move Bot: {move}')
-            origin_location = TraslateMove.traslate_to_interface(move[0], move[1]) #ast.literal_eval(input('😃 Enter your origin location (col, row): '))
-            destine_location = TraslateMove.traslate_to_interface(move[2], move[3]) #ast.literal_eval(input("😃 Enter yout destine location (col, row): "))
+            origin_location = TraslateMove.traslate_to_interface(move[0], move[1])
+            destine_location = TraslateMove.traslate_to_interface(move[2], move[3])
+            #origin_location = ast.literal_eval(input('😃 Enter your origin location (col, row): '))
+            #destine_location = ast.literal_eval(input("😃 Enter yout destine location (col, row): "))
             print(f'Origin: {origin_location} Destine: {destine_location}')
 
             event_pos = (origin_location[0]*100, origin_location[1]*100)

@@ -1,9 +1,5 @@
-import time
 import chess
 #import sunfish
-import math
-import random
-import sys
 from numpy import Infinity
 
 class Minimax:
@@ -87,24 +83,24 @@ class Minimax:
 
     def minimaxRoot(board, depth, maximizingPlayer):
         possibleMoves = board.legal_moves
-        bestMove = -Infinity
+        bestMove = Infinity * -1
         bestMoveFound = None
         
         for possible_move in possibleMoves:
             move = chess.Move.from_uci(str(possible_move))
             board.push(move)
-            value = Minimax.minimax(board, depth - 1, -Infinity, Infinity, not maximizingPlayer)
+            value = Minimax.minimax(board, depth-1, Infinity * -1, Infinity, not maximizingPlayer)
             board.pop()
             if( value >= bestMove):
-                #print("Best move: ",str(bestMoveFound))
                 bestMove = value
                 bestMoveFound = move
+                print("Best move for know: ",str(bestMoveFound))
 
         return bestMoveFound
 
     def minimax(board, depth, alpha, beta, maximizingPlayer):
         if(depth == 0):
-            return -Minimax.evaluationBoard(board)
+            return Minimax.evaluationBoard(board) * -1
 
         possibleMoves = board.legal_moves
 
@@ -126,7 +122,7 @@ class Minimax:
             return bestMove
 
         else:
-            bestMove = +Infinity
+            bestMove = Infinity
             for possibleMove in possibleMoves:
                 move = chess.Move.from_uci(str(possibleMove))
                 board.push(move)
@@ -144,11 +140,11 @@ class Minimax:
     def evaluationBoard(board):
         totalEvaluation = 0;
         i = 0;
-        j = 0
-        while  i < 8:
+        while  i <= 7 :
 
-            while j < 8:
-                
+            j = 0
+            while j <= 7:
+                print(board)
                 totalEvaluation += (Minimax.getPieceValue(str(board.piece_at(i)), i, j))
                 j += 1
 
@@ -165,53 +161,53 @@ class Minimax:
 
         if (piece == 'P'):
             absoluteValue = 10 + Minimax.pawnEvalWhite[x][y]
-            return  -absoluteValue
+            return  absoluteValue
         
         if (piece == 'p'):
             absoluteValue = 10 + Minimax.pawnEvalBlack[x][y]
-            return  absoluteValue
+            return  absoluteValue * -1
         
         if (piece == 'n'):
             absoluteValue = 30 + Minimax.knightEval[x][y]
-            return  absoluteValue
+            return  absoluteValue * -1
         
         if (piece == 'N'):
             absoluteValue = 30 + Minimax.knightEval[x][y]
-            return  -absoluteValue
+            return  absoluteValue
 
         if (piece == 'b'):
             absoluteValue = 30 + Minimax.bishopEvalBlack[x][y]
-            return  absoluteValue
+            return  absoluteValue * -1
 
         if (piece == 'B'):
             absoluteValue = 30 + Minimax.bishopEvalWhite[x][y]
-            return  -absoluteValue
+            return  absoluteValue
 
         if (piece == 'r'):
             absoluteValue = 50 + Minimax.rookEvalBlack[x][y]
-            return  absoluteValue
+            return  absoluteValue * -1
 
         if (piece == 'R'):
             absoluteValue = 50 + Minimax.rookEvalWhite[x][y]
-            return  -absoluteValue
+            return  absoluteValue
 
         if (piece == 'q'):
             absoluteValue = 90 + Minimax.queenEval[x][y]
-            return  absoluteValue
+            return  absoluteValue * -1
 
         if (piece == 'Q'):
             absoluteValue = 90 + Minimax.queenEval[x][y]
-            return  -absoluteValue
+            return  absoluteValue
 
         if (piece == 'k'):
             absoluteValue = 900 + Minimax.kingEvalBlack[x][y]
-            return  absoluteValue
+            return  absoluteValue * -1
 
         if (piece == 'K'):
             absoluteValue = 900 + Minimax.kingEvalWhite[x][y]
             return  -absoluteValue
 
-        print(f'Unknown piece type: {piece}')
+        return absoluteValue
 
     def main(move, next_player, board):
 
@@ -228,7 +224,7 @@ class Minimax:
 
         elif(next_player == 'black'):
             print('----------------')
-            print("🤖 My Turn:")
+            print(" My Turn:")
             move = Minimax.minimaxRoot(board, 2, True)
             move = chess.Move.from_uci(str(move))
             board.push(move)
