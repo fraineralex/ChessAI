@@ -1,11 +1,12 @@
+import datetime
 import chess
 #import sunfish
-from numpy import Infinity
+from numpy import Infinity, flip
 
 class Minimax:
 
     def reverseArray(array): 
-        return array.reverse()
+        return flip(array)
 
     pawnEvalWhite = [
     [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
@@ -82,57 +83,77 @@ class Minimax:
     kingEvalBlack = reverseArray(kingEvalWhite);
 
     def minimaxRoot(board, depth, maximizingPlayer):
+        time_before = datetime.datetime.now()
         possibleMoves = board.legal_moves
-        bestMove = Infinity * -1
+        bestMove = -9999
         bestMoveFound = None
         
         for possible_move in possibleMoves:
+            time_after = datetime.datetime.now()
             move = chess.Move.from_uci(str(possible_move))
             board.push(move)
-            value = Minimax.minimax(board, depth-1, Infinity * -1, Infinity, not maximizingPlayer)
+            value = Minimax.minimax(board, depth-1, -10000, 10000, not maximizingPlayer)
             board.pop()
             if( value >= bestMove):
                 bestMove = value
                 bestMoveFound = move
-                print("Best move for know: ",str(bestMoveFound))
+                print("Best move for now: ",str(bestMoveFound))
+                answerTime = time_after - time_before
+                if(answerTime.seconds >= 3):
+                    return bestMoveFound
+                
 
         return bestMoveFound
 
     def minimax(board, depth, alpha, beta, maximizingPlayer):
+        time_before = datetime.datetime.now()
         if(depth == 0):
             return Minimax.evaluationBoard(board) * -1
 
         possibleMoves = board.legal_moves
 
         if(maximizingPlayer):
-            bestMove = -Infinity
+            bestMove = -9999
 
             for possibleMove in possibleMoves:
+                time_after = datetime.datetime.now()
                 move = chess.Move.from_uci(str(possibleMove))
                 board.push(move)
                 value = Minimax.minimax(board, depth-1, alpha, beta, False)
                 bestMove = max(bestMove, value)
-                alpha = max(alpha, value);
-                if (alpha >= beta):
-                    board.pop();
-                    break;
-
                 board.pop()
+                alpha = max(alpha, value);
+                if (beta <= alpha):
+                    #board.pop();
+                    #break;
+                    return bestMove
+                
+                answerTime = time_after - time_before
+                if(answerTime.seconds >= 3):
+                    return bestMove
+
+                #board.pop()
 
             return bestMove
 
         else:
-            bestMove = Infinity
+            bestMove = 9999
             for possibleMove in possibleMoves:
+                time_after = datetime.datetime.now()
                 move = chess.Move.from_uci(str(possibleMove))
                 board.push(move)
                 value = Minimax.minimax(board, depth-1, alpha, beta, True)
-                bestMove = min(bestMove, value)
-                if (alpha >= beta):
-                    board.pop()
-                    break;
-
                 board.pop()
+                bestMove = min(bestMove, value)
+                if (beta <= alpha):
+                    #board.pop()
+                    #break;
+                    return bestMove
+
+                answerTime = time_after - time_before
+                if(answerTime.seconds >= 3):
+                    return bestMove
+                #board.pop()
 
             return bestMove
 
@@ -140,21 +161,23 @@ class Minimax:
     def evaluationBoard(board):
         totalEvaluation = 0;
         i = 0;
+        s = -1
+        #while s >= 63:
         while  i <= 7 :
-
             j = 0
             while j <= 7:
-                print(board)
-                totalEvaluation += (Minimax.getPieceValue(str(board.piece_at(i)), i, j))
+                s += 1
+                totalEvaluation += (Minimax.getPieceValue(str(board.piece_at(s)), i, j))
                 j += 1
 
             i += 1
-            
+        
+        #print('The number is: ',s)
         return totalEvaluation;
 
 
     def getPieceValue(piece, x, y):
-        if (piece == None or piece == ''):
+        if (piece == None or piece == 'None'):
             return 0;
     
         absoluteValue = 0;
@@ -207,9 +230,10 @@ class Minimax:
             absoluteValue = 900 + Minimax.kingEvalWhite[x][y]
             return  -absoluteValue
 
+        print(f'unknow pice: {piece} in the interval: [{x}],[{y}]')
         return absoluteValue
 
-    def main(move, next_player, board):
+    def main(move, next_player, board, time_before = datetime.datetime.now()):
 
         #board = chess.Board()
 
@@ -224,8 +248,12 @@ class Minimax:
 
         elif(next_player == 'black'):
             print('----------------')
-            print(" My Turn:")
+            print("Minimax Turn:")
+            print('\n-----------------\nMinimax is Calculating...\n-----------------')
             move = Minimax.minimaxRoot(board, 2, True)
+            time_after = datetime.datetime.now()
+            answerTime = time_after - time_before
+            print(f'Minimax time: {answerTime.seconds} segundos')
             move = chess.Move.from_uci(str(move))
             board.push(move)
             print(board)

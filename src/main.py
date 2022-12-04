@@ -1,3 +1,4 @@
+import datetime
 import time
 import chess
 import pygame
@@ -28,6 +29,7 @@ class Main:
         minimax_board = chess.Board()
 
 
+        time_before = datetime.datetime.now()
 
         while True:
             #First player
@@ -47,6 +49,7 @@ class Main:
                 botPlayer = BotPlayer(screen, game, board, dragger)
                 botPlayer.Minimax() """
 
+            
             for event in pygame.event.get():
 
                 # click
@@ -116,6 +119,10 @@ class Main:
                             game.show_last_move(screen)
                             game.show_pieces(screen)
 
+                            time_after = datetime.datetime.now()
+                            answerTime = time_after - time_before
+                            print(f'Person time: {answerTime.seconds} segundos')
+
                             # Minimax call
                             human_origin_location = TraslateMove.traslate_to_minimax(dragger.initial_col, dragger.initial_row)
                             human_destine_location = TraslateMove.traslate_to_minimax(released_col, released_row)
@@ -136,6 +143,7 @@ class Main:
                     ##########################################
                     botPlayer = BotPlayer()
                     minimax_board = botPlayer.Minimax(screen, game, board, dragger, minimax_board)
+                    time_before = datetime.datetime.now()
 
                     
                 # key press
