@@ -1,11 +1,15 @@
+import time
+import chess
 import pygame
 import sys
 
 from const import *
 from game import Game
+from minimax import Minimax
 from square import Square
 from move import Move
 from bot_player import BotPlayer
+from traslate_move import TraslateMove
 
 class Main:
 
@@ -21,8 +25,14 @@ class Main:
         game = self.game
         board = self.game.board
         dragger = self.game.dragger
+        minimax_board = chess.Board()
+
+
 
         while True:
+            #First player
+            #############################
+
             # show methods
             game.show_bg(screen)
             game.show_last_move(screen)
@@ -32,6 +42,10 @@ class Main:
 
             if dragger.dragging:
                 dragger.update_blit(screen)
+
+            """ if(game.next_player == 'white'):
+                botPlayer = BotPlayer(screen, game, board, dragger)
+                botPlayer.Minimax() """
 
             for event in pygame.event.get():
 
@@ -101,15 +115,29 @@ class Main:
                             game.show_bg(screen)
                             game.show_last_move(screen)
                             game.show_pieces(screen)
+
+                            # Minimax call
+                            human_origin_location = TraslateMove.traslate_to_minimax(dragger.initial_col, dragger.initial_row)
+                            human_destine_location = TraslateMove.traslate_to_minimax(released_col, released_row)
+                            human_move = f'{human_origin_location}{human_destine_location}'
+                            minimax_board = Minimax.main(human_move, game.next_player, minimax_board)
+
                             # next turn
                             game.next_turn()
-                            if(game.next_player == 'black'):
-                                BotPlayer.bot_player()
-                                #print("black turn")
 
+                            
                     
                     dragger.undrag_piece()
                 
+                elif(game.next_player == 'black'):
+
+                    ##########################################
+                    #-------------Second player------------#
+                    ##########################################
+                    botPlayer = BotPlayer()
+                    minimax_board = botPlayer.Minimax(screen, game, board, dragger, minimax_board)
+
+                    
                 # key press
                 elif event.type == pygame.KEYDOWN:
                     
