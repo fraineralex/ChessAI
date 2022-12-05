@@ -28,4 +28,4 @@ class Config:
         blue = Theme((229, 228, 200), (60, 95, 135), (123, 187, 227), (43, 119, 191), '#C86464', '#C84646')
         gray = Theme((120, 119, 118), (86, 85, 84), (99, 126, 143), (82, 102, 128), '#C86464', '#C84646')
 
-        self.themes = [green, brown, blue, gray]
+        self.themes = [blue, green, brown, gray]

@@ -3,6 +3,8 @@ import chess
 #import sunfish
 from numpy import Infinity, flip
 
+from game import Game
+
 class Minimax:
 
     def reverseArray(array): 
@@ -11,7 +13,7 @@ class Minimax:
     pawnEvalWhite = [
     [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
     [ 5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0],
-    [ 1.0,  1.0,  2.0,  3.0,  3.0,  2.0,  1.0,  1.0],
+    [ 1.0,  1.0,  2.0,  3.0,  6.0,  2.0,  1.0,  1.0],
     [ 0.5,  0.5,  1.0,  2.5,  2.5,  1.0,  0.5,  0.5],
     [ 0.0,  0.0,  0.0,  2.0,  2.0,  0.0,  0.0,  0.0],
     [ 0.5, -0.5, -1.0,  0.0,  0.0, -1.0, -0.5,  0.5],
@@ -82,44 +84,47 @@ class Minimax:
 
     kingEvalBlack = reverseArray(kingEvalWhite);
 
-    def minimaxRoot(board, depth, maximizingPlayer):
-        time_before = datetime.datetime.now()
+    def minimaxRoot(board: chess.Board, depth, maximizingPlayer, time_before: datetime.datetime, limit_time):
         possibleMoves = board.legal_moves
-        bestMove = -9999
+        bestMove = float("-inf")
         bestMoveFound = None
         
         for possible_move in possibleMoves:
             time_after = datetime.datetime.now()
             move = chess.Move.from_uci(str(possible_move))
             board.push(move)
-            value = Minimax.minimax(board, depth-1, -10000, 10000, not maximizingPlayer)
+            value = Minimax.minimax(board, depth-1, float("-inf"), float("inf"), not maximizingPlayer, time_before, limit_time)
             board.pop()
             if( value >= bestMove):
                 bestMove = value
                 bestMoveFound = move
                 print("Best move for now: ",str(bestMoveFound))
                 answerTime = time_after - time_before
-                if(answerTime.seconds >= 3):
+                if(answerTime.seconds >= limit_time):
                     return bestMoveFound
                 
 
         return bestMoveFound
 
-    def minimax(board, depth, alpha, beta, maximizingPlayer):
-        time_before = datetime.datetime.now()
+    def minimax(board: chess.Board, depth, alpha, beta, maximizingPlayer, time_before: datetime.datetime, limit_time):
         if(depth == 0):
-            return Minimax.evaluationBoard(board) * -1
+            # Heuristic evaluation
+            node_evaluation = 0
+            node_evaluation += Minimax.evaluationBoard(board) * -1
+            node_evaluation += Minimax.checkmate_status(board, node_evaluation, maximizingPlayer)
+            node_evaluation += Minimax.good_square_moves(board, maximizingPlayer)
+            return node_evaluation
 
         possibleMoves = board.legal_moves
 
         if(maximizingPlayer):
-            bestMove = -9999
+            bestMove = float("-inf")
 
             for possibleMove in possibleMoves:
                 time_after = datetime.datetime.now()
                 move = chess.Move.from_uci(str(possibleMove))
                 board.push(move)
-                value = Minimax.minimax(board, depth-1, alpha, beta, False)
+                value = Minimax.minimax(board, depth-1, alpha, beta, False, time_before, limit_time)
                 bestMove = max(bestMove, value)
                 board.pop()
                 alpha = max(alpha, value);
@@ -129,7 +134,7 @@ class Minimax:
                     return bestMove
                 
                 answerTime = time_after - time_before
-                if(answerTime.seconds >= 3):
+                if(answerTime.seconds >= limit_time):
                     return bestMove
 
                 #board.pop()
@@ -137,12 +142,12 @@ class Minimax:
             return bestMove
 
         else:
-            bestMove = 9999
+            bestMove = float("inf")
             for possibleMove in possibleMoves:
                 time_after = datetime.datetime.now()
                 move = chess.Move.from_uci(str(possibleMove))
                 board.push(move)
-                value = Minimax.minimax(board, depth-1, alpha, beta, True)
+                value = Minimax.minimax(board, depth-1, alpha, beta, True, time_before, limit_time)
                 board.pop()
                 bestMove = min(bestMove, value)
                 if (beta <= alpha):
@@ -151,7 +156,7 @@ class Minimax:
                     return bestMove
 
                 answerTime = time_after - time_before
-                if(answerTime.seconds >= 3):
+                if(answerTime.seconds >= limit_time):
                     return bestMove
                 #board.pop()
 
@@ -233,32 +238,80 @@ class Minimax:
         print(f'unknow pice: {piece} in the interval: [{x}],[{y}]')
         return absoluteValue
 
-    def main(move, next_player, board, time_before = datetime.datetime.now()):
+    def checkmate_status(board: chess.Board, node_evaluation, currently_player):
+        black_points = 0
+        is_check = board.is_check()
+        is_checkmate = board.is_checkmate()
+        turn = "black" if currently_player == False else "white"
+
+        if turn == "white":
+            if (is_check):
+                black_points += 1 * node_evaluation
+            elif (is_checkmate):
+                black_points += float("inf")
+        else:
+            if is_check == 1:
+                black_points -= 1 * node_evaluation
+            elif (is_checkmate):
+                black_points += float("-inf")
+
+        return black_points
+    
+    def good_square_moves(board: chess.Board, currently_player):
+        node_evaluation = 0
+        turn = "black" if currently_player == False else "white"
+        square_values = {"e4": 1, "e5": 1, "d4": 1, "d5": 1, "c6": 0.5, "d6": 0.5, "e6": 0.5, "f6": 0.5,
+                        "c3": 0.5, "d3": 0.5, "e3": 0.5, "f3": 0.5, "c4": 0.5, "c5": 0.5, "f4": 0.5, "f5": 0.5}
+
+        possible_moves = board.legal_moves
+        for possible_move in possible_moves:
+            move = str(possible_move)
+            if turn == "black":
+                if move[2:4] in square_values:
+                    node_evaluation += square_values[move[2:4]]
+            else:
+                if move[2:4] in square_values:
+                    node_evaluation -= square_values[move[2:4]]
+                    
+        return node_evaluation
+
+    def main(move, next_player, board: chess.Board, limit_time = 3):
 
         #board = chess.Board()
 
         if (next_player == 'white'):
-            print('----------------')
-            #move = input("😃 Your turn: ")
-            move = chess.Move.from_uci(str(move))
-            board.push(move)
-            print(board)
+            is_game_over = board.outcome()
+            if(is_game_over):
+                print('Game over')
 
-            return(board)
+                return 'Game over'
+            else:
+                move = chess.Move.from_uci(str(move))
+                board.push(move)
+                print(board)
+                print('----------------')
+                print('Person move: ',str(move))
+
+                return(board)
 
         elif(next_player == 'black'):
-            print('----------------')
-            print("Minimax Turn:")
-            print('\n-----------------\nMinimax is Calculating...\n-----------------')
-            move = Minimax.minimaxRoot(board, 2, True)
-            time_after = datetime.datetime.now()
-            answerTime = time_after - time_before
-            print(f'Minimax time: {answerTime.seconds} segundos')
-            move = chess.Move.from_uci(str(move))
-            board.push(move)
-            print(board)
+            is_game_over = board.outcome()
+            if(is_game_over):
+                print('Game over')
+            else:
+                print('----------------')
+                print("Minimax Turn:")
+                print('\n-----------------\nMinimax is Calculating...\n-----------------')
+                time_before = datetime.datetime.now()
+                move = Minimax.minimaxRoot(board, 3, True, time_before, limit_time)
+                time_after = datetime.datetime.now()
+                answerTime = time_after - time_before
+                print(f'Minimax time: {answerTime.seconds} segundos')
+                move = chess.Move.from_uci(str(move))
+                board.push(move)
+                print(board)
 
-            return (move, board)
+                return (move, board)
         
 
 

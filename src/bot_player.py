@@ -17,12 +17,10 @@ class BotPlayer:
         self.test = 'd'
 
 
-    def Minimax(self, screen, game: Game, board: Board, dragger: Dragger, minimax_board):
+    def main(self, screen, game: Game, board: Board, dragger: Dragger, minimax_board, limit_time):
 
         if(game.next_player == 'black'):
             
-            time_before = datetime.datetime.now()
-
             game.show_bg(screen)
             game.show_last_move(screen)
             game.show_moves(screen)
@@ -32,7 +30,10 @@ class BotPlayer:
             if dragger.dragging:
                 dragger.update_blit(screen)
 
-            minimaxResult = Minimax.main('', game.next_player, minimax_board, time_before)
+            minimaxResult = Minimax.main('', game.next_player, minimax_board, limit_time)
+            if(minimaxResult == None):
+                return minimaxResult
+
             move = str(minimaxResult[0])
             minimax_board = minimaxResult[1]
             print(f'Move Bot: {move}')

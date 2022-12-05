@@ -27,9 +27,8 @@ class Main:
         board = self.game.board
         dragger = self.game.dragger
         minimax_board = chess.Board()
-
-
         time_before = datetime.datetime.now()
+        limit_minimax_time = 10
 
         while True:
             #First player
@@ -44,10 +43,6 @@ class Main:
 
             if dragger.dragging:
                 dragger.update_blit(screen)
-
-            """ if(game.next_player == 'white'):
-                botPlayer = BotPlayer(screen, game, board, dragger)
-                botPlayer.Minimax() """
 
             
             for event in pygame.event.get():
@@ -121,13 +116,16 @@ class Main:
 
                             time_after = datetime.datetime.now()
                             answerTime = time_after - time_before
-                            print(f'Person time: {answerTime.seconds} segundos')
-
+                            
                             # Minimax call
                             human_origin_location = TraslateMove.traslate_to_minimax(dragger.initial_col, dragger.initial_row)
                             human_destine_location = TraslateMove.traslate_to_minimax(released_col, released_row)
                             human_move = f'{human_origin_location}{human_destine_location}'
                             minimax_board = Minimax.main(human_move, game.next_player, minimax_board)
+                            if(minimax_board == None):
+                                pygame.quit()
+                                sys.exit()
+                            print(f'Person time: {answerTime.seconds} segundos')
 
                             # next turn
                             game.next_turn()
@@ -142,18 +140,20 @@ class Main:
                     #-------------Second player------------#
                     ##########################################
                     botPlayer = BotPlayer()
-                    minimax_board = botPlayer.Minimax(screen, game, board, dragger, minimax_board)
+                    minimax_board = botPlayer.main(screen, game, board, dragger, minimax_board, limit_minimax_time )
                     time_before = datetime.datetime.now()
+                    if(minimax_board == 'Game over'):
+                        pygame.quit()
+                        sys.exit()
 
-                    
                 # key press
                 elif event.type == pygame.KEYDOWN:
-                    
+
                     # changing themes
                     if event.key == pygame.K_t:
                         game.change_theme()
 
-                     # changing themes
+                     # reset game
                     if event.key == pygame.K_r:
                         game.reset()
                         game = self.game
