@@ -13,7 +13,7 @@ class Minimax:
     pawnEvalWhite = [
     [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
     [ 5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0],
-    [ 1.0,  1.0,  2.0,  3.0,  3.0,  2.0,  1.0,  1.0],
+    [ 1.0,  1.0,  2.0,  3.0,  6.0,  2.0,  1.0,  1.0],
     [ 0.5,  0.5,  1.0,  2.5,  2.5,  1.0,  0.5,  0.5],
     [ 0.0,  0.0,  0.0,  2.0,  2.0,  0.0,  0.0,  0.0],
     [ 0.5, -0.5, -1.0,  0.0,  0.0, -1.0, -0.5,  0.5],
@@ -107,7 +107,9 @@ class Minimax:
         return bestMoveFound
 
     def minimax(board: chess.Board, depth, alpha, beta, maximizingPlayer, time_before: datetime.datetime, limit_time, turn):
-        if(depth == 0):
+        time_after = datetime.datetime.now()
+        answerTime = time_after - time_before
+        if(depth == 0 or answerTime.seconds >= limit_time):
             # Heuristic evaluation
             node_evaluation = 0
             node_evaluation += Minimax.check_status(board, node_evaluation, turn)
