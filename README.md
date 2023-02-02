@@ -48,6 +48,8 @@ Artificial Intelligence Chess developed with the minimax adversarial search algo
 
 By default it analyzes the best move at a depth of 2 and with a time limit of 10 seconds, this means that it will evaluate all possible moves taking into account the outcome of 2 boards in the future.
 
+https://user-images.githubusercontent.com/89224196/216224624-7c3c1718-6f93-4592-8720-afc9e4b2dc11.mp4
+
 ## :rocket: Main Technologies ##
 
 <a href="https://python.org">
