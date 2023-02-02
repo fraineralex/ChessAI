@@ -39,7 +39,7 @@
   <a href="#rocket-main-technologies">Technologies</a> &#xa0; | &#xa0;
   <a href="#white_check_mark-requirements">Requirements</a> &#xa0; | &#xa0;
   <a href="#checkered_flag-starting">Starting</a> &#xa0; | &#xa0;
-  <a href="https://github.com/maurodesouza/profile-readme-generator/blob/main/.github/CONTRIBUTING.md">Contributing</a>
+  <a href="https://github.com/fraineralex/ChessAI/edit/master/README.md">Contributing</a>
 </p>
 
 ## :dart: About ##
